@@ -36,7 +36,7 @@ app.get('/dados-planilha', async (req, res) => {
     const sheets = google.sheets({ version: 'v4', auth: client });
 
     const spreadsheetId = '16O0CEuYVZbDeqDIiyxWN91P0vUcAquTaR7snAOY53Ug';
-    const range = 'ACOPLADO!A1:R1000'; // Lê a aba inteira
+    const range = 'ACOPLADO!A1:R3000'; // Lê a aba inteira
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,

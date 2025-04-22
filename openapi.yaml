@@ -14,7 +14,7 @@ paths:
       summary: Retorna os dados da planilha ACOPLADO
       description: Este endpoint retorna um array de arrays com os dados da planilha do Google Sheets (colunas A até R da aba ACOPLADO).
       responses:
-        '200':
+        '2041':
           description: Dados retornados com sucesso
           content:
             application/json:
