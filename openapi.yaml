@@ -1,20 +1,21 @@
 openapi: 3.1.0
 info:
-  title: Leitor de Planilha de Notas
-  description: API para acessar dados do Google Sheets
+  title: API Planilha ACOPLADO
+  description: Retorna os dados da aba "ACOPLADO" de uma planilha do Google Sheets com colunas de A até R.
   version: 1.0.0
 
 servers:
-  - url: https://SEU_LINK_DO_RENDER_AQUI
+  - url: https://planilha-api.onrender.com
 
 paths:
   /dados-planilha:
     get:
-      operationId: getNotasPlanilha
-      summary: Retorna os dados da planilha
+      operationId: getPlanilhaAcoplado
+      summary: Retorna os dados da planilha ACOPLADO
+      description: Este endpoint retorna um array de arrays com os dados da planilha do Google Sheets (colunas A até R da aba ACOPLADO).
       responses:
         '200':
-          description: Lista de dados da planilha
+          description: Dados retornados com sucesso
           content:
             application/json:
               schema:

@@ -6,21 +6,21 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
-// Carrega as credenciais conforme o ambiente (local ou nuvem)
+// Carrega as credenciais do ambiente (Render) ou do arquivo local
 let credentials;
 
 if (process.env.GOOGLE_CREDENTIALS) {
   try {
     credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
   } catch (err) {
-    console.error('❌ Erro ao fazer parse do GOOGLE_CREDENTIALS:', err.message);
+    console.error('❌ Erro ao interpretar GOOGLE_CREDENTIALS:', err.message);
     process.exit(1);
   }
 } else {
   try {
     credentials = require('./credenciais.json');
   } catch (err) {
-    console.error('❌ credenciais.json não encontrado ou inválido. Defina a variável de ambiente GOOGLE_CREDENTIALS ou inclua o arquivo.');
+    console.error('❌ Arquivo credenciais.json não encontrado.');
     process.exit(1);
   }
 }
@@ -36,16 +36,37 @@ app.get('/dados-planilha', async (req, res) => {
     const sheets = google.sheets({ version: 'v4', auth: client });
 
     const spreadsheetId = '16O0CEuYVZbDeqDIiyxWN91P0vUcAquTaR7snAOY53Ug';
-    const range = 'ACOPLADO!A1:R2041'; // Ajustado conforme sua planilha
+    const range = 'ACOPLADO!A1:R1000'; // Lê a aba inteira
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range
     });
 
-    res.json(response.data.values);
+    const data = response.data.values;
+    const header = data[0];
+    const rows = data.slice(1);
+
+    // Índices das colunas desejadas
+    const colunasDesejadas = [
+      'UNIDADE RESUMIDA',
+      'TURMA',
+      'Componente curricular',
+      'Professores 2025',
+      'Aulas 2025'
+    ];
+
+    const indices = colunasDesejadas.map(col => header.indexOf(col));
+
+    // Reconstruindo o novo array com apenas as colunas desejadas
+    const dadosFiltrados = rows.map(row =>
+      indices.map(i => row[i] || '')
+    );
+
+    // Enviar com cabeçalho incluído
+    res.json([colunasDesejadas, ...dadosFiltrados]);
   } catch (error) {
-    console.error('❌ Erro ao acessar a planilha:', error.message);
+    console.error('❌ Erro ao acessar planilha:', error.message);
     res.status(500).json({
       erro: 'Erro ao acessar a planilha',
       detalhes: error.message
