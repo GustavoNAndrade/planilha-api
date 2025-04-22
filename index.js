@@ -1,3 +1,35 @@
+const express = require('express');
+const cors = require('cors');
+const { google } = require('googleapis');
+const app = express(); // 👈 ESSA LINHA ESTAVA FALTANDO!
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+
+// Carregando credenciais de ambiente ou arquivo
+let credentials;
+
+if (process.env.GOOGLE_CREDENTIALS) {
+  try {
+    credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+  } catch (err) {
+    console.error('❌ Erro ao interpretar GOOGLE_CREDENTIALS:', err.message);
+    process.exit(1);
+  }
+} else {
+  try {
+    credentials = require('./credenciais.json');
+  } catch (err) {
+    console.error('❌ Arquivo credenciais.json não encontrado.');
+    process.exit(1);
+  }
+}
+
+const auth = new google.auth.GoogleAuth({
+  credentials,
+  scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
+});
+
 app.get('/dados-planilha', async (req, res) => {
   try {
     const client = await auth.getClient();
@@ -15,7 +47,7 @@ app.get('/dados-planilha', async (req, res) => {
     const header = data[0];
     const rows = data.slice(1);
 
-    // Pega os índices das colunas desejadas
+    // Índices das colunas desejadas
     const colunasDesejadas = [
       'UNIDADE RESUMIDA',
       'TURMA',
@@ -37,7 +69,14 @@ app.get('/dados-planilha', async (req, res) => {
 
     res.json(dadosFormatados);
   } catch (error) {
-    console.error('Erro ao acessar planilha:', error.message);
-    res.status(500).json({ erro: error.message });
+    console.error('❌ Erro ao acessar planilha:', error.message);
+    res.status(500).json({
+      erro: 'Erro ao acessar a planilha',
+      detalhes: error.message
+    });
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`✅ API rodando em http://localhost:${PORT}`);
 });
