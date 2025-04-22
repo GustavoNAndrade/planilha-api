@@ -1,12 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const { google } = require('googleapis');
-const app = express(); // 👈 ESSA LINHA ESTAVA FALTANDO!
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
-// Carregando credenciais de ambiente ou arquivo
+// Carrega as credenciais do ambiente (Render) ou do arquivo local
 let credentials;
 
 if (process.env.GOOGLE_CREDENTIALS) {
@@ -36,7 +36,7 @@ app.get('/dados-planilha', async (req, res) => {
     const sheets = google.sheets({ version: 'v4', auth: client });
 
     const spreadsheetId = '16O0CEuYVZbDeqDIiyxWN91P0vUcAquTaR7snAOY53Ug';
-    const range = 'ACOPLADO!A1:R1000';
+    const range = 'ACOPLADO!A1:R1000'; // Lê a aba inteira
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -55,19 +55,16 @@ app.get('/dados-planilha', async (req, res) => {
       'Professores 2025',
       'Aulas 2025'
     ];
+
     const indices = colunasDesejadas.map(col => header.indexOf(col));
 
-    const dadosFormatados = rows.map(row => {
-      return {
-        unidade: row[indices[0]] || '',
-        turma: row[indices[1]] || '',
-        componente: row[indices[2]] || '',
-        professor: row[indices[3]] || '',
-        aulas: row[indices[4]] || ''
-      };
-    });
+    // Reconstruindo o novo array com apenas as colunas desejadas
+    const dadosFiltrados = rows.map(row =>
+      indices.map(i => row[i] || '')
+    );
 
-    res.json(dadosFormatados);
+    // Enviar com cabeçalho incluído
+    res.json([colunasDesejadas, ...dadosFiltrados]);
   } catch (error) {
     console.error('❌ Erro ao acessar planilha:', error.message);
     res.status(500).json({
