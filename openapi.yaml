@@ -1,0 +1,25 @@
+openapi: 3.1.0
+info:
+  title: Leitor de Planilha de Notas
+  description: API para acessar dados do Google Sheets
+  version: 1.0.0
+
+servers:
+  - url: https://SEU_LINK_DO_RENDER_AQUI
+
+paths:
+  /dados-planilha:
+    get:
+      operationId: getNotasPlanilha
+      summary: Retorna os dados da planilha
+      responses:
+        '200':
+          description: Lista de dados da planilha
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
